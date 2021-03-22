@@ -3,6 +3,7 @@
 const express = require("express")
 const bodyParser = require("body-parser")
 const mongoose = require("mongoose")
+const encrypt = require("mongoose-encryption")
 
 const app = express()
 
@@ -19,11 +20,24 @@ mongoose.connect(uri + dbName, {
   useUnifiedTopology: true
 })
 
+// secret long String
+const secret = "alalalalalalalalaallalalalaalal"
+
+
 // user schema
-const userSchema = {
+
+
+// upgrade user schema
+const userSchema = new mongoose.Schema({
   email: String,
   password: String
-}
+})
+
+// plug the encrypt module to userSchema
+userSchema.plugin(encrypt, {
+  secret: secret,
+  encryptedFields: ["password"]
+})
 
 const User = mongoose.model("User", userSchema)
 
@@ -59,7 +73,7 @@ app.post("/register", function(req, res) {
 
 app.post("/login", function(req, res) {
 
-  User.findOne({
+  User.find({
     email: req.body.username,
     password: req.body.password
   }, function(err, correctCredentials) {
